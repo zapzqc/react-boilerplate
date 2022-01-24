@@ -1,21 +1,25 @@
-const {resolve} = require('path');
+const { resolve } = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
+const JsonMinimizerPlugin = require('json-minimizer-webpack-plugin');
+const { extendDefaultPlugins } = require('svgo');
 
 const appPath = resolve(__dirname, 'src');
 const config = {
   entry: './src/index.tsx', // Indicates which module webpack should use to begin building out its internal dependency graph.By default its value is ./src/index.js.
-  
-  output: { // where to emit the bundles it creates and how to name these files.
-    filename: 'js/[name].[contenthash].js',  // output file It defaults to ./dist/main.js.
+
+  output: {
+    // where to emit the bundles it creates and how to name these files.
+    filename: 'js/[name].[contenthash].js', // output file It defaults to ./dist/main.js.
     assetModuleFilename: 'img/[hash][ext][query]', // By default, asset/resource modules are emitting with [hash][ext][query] filename into output directory.
-    path: resolve(__dirname, 'dist'), // The output directory as an absolute 
+    path: resolve(__dirname, 'dist'), // The output directory as an absolute
     clean: true, // Clean the output directory before emit.
-    pathinfo: false, // to include comments in bundles with information about the contained modules. 
+    pathinfo: false, // to include comments in bundles with information about the contained modules.
   },
 
   resolve: {
@@ -32,13 +36,13 @@ const config = {
       '@views': resolve(__dirname, 'src/views'),
     },
     // modules: [resolve(__dirname, 'src'), './node_modules'],
-    extensions: ['.tsx','.ts', '.js', '.jsx', '.json'], // ['.wasm', '.mjs', '.js', '.json']
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '.json'], // ['.wasm', '.mjs', '.js', '.json']
   },
-  
+
   cache: {
-    type: 'filesystem', // Cache the generated webpack modules and chunks to improve build speed. 
+    type: 'filesystem', // Cache the generated webpack modules and chunks to improve build speed.
   },
-  
+
   module: {
     rules: [
       {
@@ -59,7 +63,7 @@ const config = {
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
-      }, 
+      },
       {
         test: /\.(png|svg|jpg|jpe?g|gif|webp)$/i,
         type: 'asset',
@@ -70,7 +74,7 @@ const config = {
       },
     ],
   },
-  
+
   plugins: [
     new HtmlWebpackPlugin({
       template: 'public/index.html',
@@ -80,27 +84,50 @@ const config = {
       chunkFilename: 'css/[id].css',
     }),
     new CopyPlugin({
-      patterns: [{
-        from: './public',
-        globOptions: {
-          dot: true,
-          gitignore: true,
-          ignore: ['**/index.html'],
+      patterns: [
+        {
+          from: './public',
+          globOptions: {
+            dot: true,
+            gitignore: true,
+            ignore: ['**/index.html'],
+          },
         },
-      }],
-    }),  
+      ],
+    }),
   ],
 };
 
 module.exports = (env, argv) => {
   if (argv.mode === 'development') {
     config.devtool = 'source-map'; // eval-cheap-module-source-map
-  }
-  else if (argv.mode === 'production') {
-    config.optimization = {
+  } else if (argv.mode === 'production') {
+    (config.optimization = {
       minimizer: [
         '...',
         new CssMinimizerPlugin(),
+        new ImageMinimizerPlugin({
+          minimizer: {
+            implementation: ImageMinimizerPlugin.imageminMinify,
+            options: {
+              // Lossless optimization with custom option
+              // Feel free to experiment with options for better result for you
+              plugins: [
+                ['gifsicle', { interlaced: true }],
+                ['jpegtran', { progressive: true }],
+                ['optipng', { optimizationLevel: 5 }],
+                // Svgo configuration here https://github.com/svg/svgo#configuration
+                [
+                  'svgo',
+                  {
+                    plugins: ['preset-default'],
+                  },
+                ],
+              ],
+            },
+          },
+        }),
+        new JsonMinimizerPlugin(),
       ],
       runtimeChunk: 'single',
       splitChunks: {
@@ -112,10 +139,9 @@ module.exports = (env, argv) => {
           },
         },
       },
-    },
-    config.plugins.push(new CompressionPlugin());
-    config.plugins.push(new BundleAnalyzerPlugin());
-  };
+    }),
+      config.plugins.push(new CompressionPlugin());
+    // config.plugins.push(new BundleAnalyzerPlugin());
+  }
   return config;
 };
-

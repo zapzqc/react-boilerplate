@@ -4,7 +4,17 @@
   "scripts": {
     "serve": "pnpx webpack serve --mode=development --open",
     "start": "vite",
-    "build": "pnpx webpack --mode production"
+    "build": "pnpx webpack --mode production",
+    "prepare": "husky install",
+    "postinstall": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,tsx,jsx,ts}": [
+      "npx eslint --fix"
+    ],
+    "*.{css,scss}": [
+      "npx stylelint --fix"
+    ]
   },
   "dependencies": {
     "normalize.css": "^8.0.1",
@@ -16,6 +26,8 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
     "@typescript-eslint/parser": "^5.10.0",
     "babel-loader": "^8.2.3",
@@ -34,6 +46,7 @@
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
     "html-webpack-plugin": "^5.5.0",
+    "husky": "^7.0.4",
     "image-minimizer-webpack-plugin": "^3.2.3",
     "imagemin": "^8.0.1",
     "imagemin-gifsicle": "^7.0.0",
@@ -41,6 +54,7 @@
     "imagemin-optipng": "^8.0.0",
     "imagemin-svgo": "^10.0.1",
     "json-minimizer-webpack-plugin": "^3.3.0",
+    "lint-staged": "^12.3.1",
     "mini-css-extract-plugin": "^2.5.2",
     "postcss": "^8.4.5",
     "postcss-loader": "^6.2.1",

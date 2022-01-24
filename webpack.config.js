@@ -7,11 +7,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 const JsonMinimizerPlugin = require('json-minimizer-webpack-plugin');
-const { extendDefaultPlugins } = require('svgo');
 
-const appPath = resolve(__dirname, 'src');
 const config = {
-  entry: './src/index.tsx', // Indicates which module webpack should use to begin building out its internal dependency graph.By default its value is ./src/index.js.
+  // Indicates which module webpack should use to begin building out its internal dependency graph.By default its value is ./src/index.js.
+  entry: './src/index.tsx',
 
   output: {
     // where to emit the bundles it creates and how to name these files.
@@ -102,7 +101,8 @@ module.exports = (env, argv) => {
   if (argv.mode === 'development') {
     config.devtool = 'source-map'; // eval-cheap-module-source-map
   } else if (argv.mode === 'production') {
-    (config.optimization = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    config.optimization = {
       minimizer: [
         '...',
         new CssMinimizerPlugin(),
@@ -139,8 +139,8 @@ module.exports = (env, argv) => {
           },
         },
       },
-    }),
-      config.plugins.push(new CompressionPlugin());
+    };
+    config.plugins.push(new CompressionPlugin());
     // config.plugins.push(new BundleAnalyzerPlugin());
   }
   return config;
